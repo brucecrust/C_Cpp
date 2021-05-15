@@ -106,6 +106,14 @@ public:
     // Methods:
 
     void loadRom(char const* pFileName);
+
+    uint8_t getVx();
+
+    uint8_t getVy();
+
+    uint8_t getByte();
+
+    uint16_t getnnn();
 };
 
 #endif
