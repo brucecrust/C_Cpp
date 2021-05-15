@@ -4,11 +4,15 @@
 // Definitions and Arrays:
 
 typedef enum {
-    PSH,    // Push a given value to the stack.
-    ADD,    // Grab the last two values from the stack and push the sum back to the stack.
-    POP,    // Pops the last value off the stack and prints it.
-    SET,    // Sets register A to 0.
-    HLT     // Halts the program.
+    PSH,
+    ADD,
+    SUB,
+    MUL,
+    DIV,
+    LOG,
+    POP,
+    SET,
+    HLT
 } InstructionSet;
 
 typedef enum {
@@ -16,10 +20,27 @@ typedef enum {
     REGISTER_SIZE
 } Registers;
 
+// Demonstrate: 5+6=11, 10-5=5, 3*3=9, 36/6=6.
 const int instructions[] = {
         PSH, 5,
         PSH, 6,
         ADD,
+        LOG,
+        POP,
+        PSH, 10,
+        PSH, 5,
+        SUB,
+        LOG,
+        POP,
+        PSH, 3,
+        PSH, 3,
+        MUL,
+        LOG,
+        POP,
+        PSH, 36,
+        PSH, 6,
+        DIV,
+        LOG,
         POP,
         HLT
 };
@@ -42,34 +63,95 @@ void evaluateInstruction(int instruction) {
         case PSH: {
             registers[SP] += 1;
             registers[PC] += 1;
+
             stack[registers[SP]] = instructions[registers[PC]];
+
             break;
         }
 
         case POP: {
-            int valPopped = stack[registers[SP]];
             registers[SP] -= 1;
-            printf("Popped: %d\n", valPopped);
+
             break;
         }
 
         case ADD: {
             int a = stack[registers[SP]];
+
             registers[SP] -= 1;
+
             int b = stack[registers[SP]];
-            registers[SP] -= 1;
             int result = a + b;
 
-            registers[SP] += 1;
             stack[registers[SP]] = result;
 
-            printf("Sum: %d\n", result);
+            break;
+        }
+
+        case SUB: {
+            registers[SP] -= 1;
+
+            int a = stack[registers[SP]];
+
+            registers[SP] += 1;
+
+            int b = stack[registers[SP]];
+
+            int result = a - b;
+
+            registers[SP] -= 1;
+
+            stack[registers[SP]] = result;
+
+            break;
+        }
+
+        case MUL: {
+            int a = stack[registers[SP]];
+
+            registers[SP] -= 1;
+
+            int b = stack[registers[SP]];
+            int result = a * b;
+
+            stack[registers[SP]] = result;
+
+            break;
+        }
+
+        case DIV: {
+            registers[SP] -= 1;
+
+            int a = stack[registers[SP]];
+
+            registers[SP] += 1;
+
+            int b = stack[registers[SP]];
+
+            int result = 0;
+
+            registers[SP] -= 1;
+
+            if (a != 0 && b != 0) {
+                result = a / b;
+            }
+
+            stack[registers[SP]] = result;
 
             break;
         }
 
         case SET: {
             registers[instructions[PC + 1]] = registers[instructions[PC + 2]];
+            registers[PC] += 2;
+
+            break;
+        }
+
+        case LOG: {
+            printf("Log: %d\n", stack[registers[SP]], registers[SP]);
+
+            break;
         }
 
         default:
@@ -88,5 +170,6 @@ int main() {
         evaluateInstruction(fetch());
         registers[PC] += 1;
     }
+
     return 0;
 }
